@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>RogueWatch</title>
+<style>
+:root { color-scheme: dark; --bg:#0a0d12; --panel:#121823; --border:#283244; --text:#edf2f7; --muted:#97a5b7; --hot:#ff667d; --warn:#ffc857; --cool:#69d2e7; }
+* { box-sizing:border-box; } body { margin:0; background:var(--bg); color:var(--text); font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; }
+header { padding:22px 26px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+h1 { margin:0; letter-spacing:.12em; font-size:20px; } main { padding:24px; max-width:1400px; margin:auto; }
+.toolbar { display:flex; gap:10px; margin-bottom:18px; } button { background:#1d2634; color:var(--text); border:1px solid var(--border); padding:9px 13px; cursor:pointer; border-radius:6px; }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; } .panel { background:var(--panel); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.panel h2 { margin:0; padding:13px 15px; border-bottom:1px solid var(--border); font-size:14px; } .row { padding:12px 15px; border-bottom:1px solid #1e2734; }
+.row:last-child { border-bottom:0; } .score { font-weight:700; } .high { color:var(--hot); } .mid { color:var(--warn); } .low { color:var(--cool); } .muted { color:var(--muted); }
+.signal { margin-top:5px; font-size:12px; color:var(--muted); } #status { color:var(--muted); }
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><h1>ROGUEWATCH</h1><div id="status">loading…</div></header>
+<main>
+  <div class="toolbar"><button onclick="loadDemo()">Load ground-truth demo</button><button onclick="refresh()">Refresh</button></div>
+  <div class="grid"><section class="panel"><h2>Suspected actors</h2><div id="actors"></div></section><section class="panel"><h2>Suspected channels</h2><div id="channels"></div></section></div>
+</main>
+<script>
+const cls = s => s >= .55 ? 'high' : s >= .3 ? 'mid' : 'low';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+async function refresh(){ const r=await fetch('/analysis'); const d=await r.json(); document.getElementById('status').textContent=`${d.event_count} events`;
+ document.getElementById('actors').innerHTML=d.actors.map(x=>`<div class="row"><div><b>${esc(x.actor_id)}</b> · ${esc(x.classification)} · <span class="score ${cls(x.confidence)}">${(x.confidence*100).toFixed(1)}%</span></div>${x.signals.slice(0,4).map(s=>`<div class="signal">${esc(s.name)} ${(s.score*100).toFixed(0)}% — ${esc(s.reason)}</div>`).join('')}</div>`).join('') || '<div class="row muted">No actor findings yet.</div>';
+ document.getElementById('channels').innerHTML=d.channels.map(x=>`<div class="row"><div><b>${esc(x.actor_a)} ↔ ${esc(x.actor_b)}</b> · <span class="score ${cls(x.confidence)}">${(x.confidence*100).toFixed(1)}%</span></div>${x.signals.map(s=>`<div class="signal">${esc(s.name)} ${(s.score*100).toFixed(0)}% — ${esc(s.reason)}</div>`).join('')}</div>`).join('') || '<div class="row muted">No channel findings yet.</div>';
+}
+async function loadDemo(){ await fetch('/demo/load',{method:'POST'}); await refresh(); } refresh();
+</script>
+</body>
+</html>
