@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 from uuid import uuid4
@@ -20,7 +20,7 @@ class Event(BaseModel):
     id: str = Field(default_factory=lambda: uuid4().hex)
     source: str
     actor_id: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     kind: str = "message"
     text: str = ""
     url: str | None = None
@@ -32,8 +32,8 @@ class Event(BaseModel):
     @classmethod
     def normalize_timestamp(cls, value: datetime) -> datetime:
         if value.tzinfo is None:
-            return value.replace(tzinfo=timezone.utc)
-        return value.astimezone(timezone.utc)
+            return value.replace(tzinfo=UTC)
+        return value.astimezone(UTC)
 
 
 class Signal(BaseModel):

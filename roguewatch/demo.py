@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from .models import Event
 
 
 def demo_events() -> list[Event]:
-    start = datetime(2026, 9, 11, 12, 0, tzinfo=timezone.utc)
+    start = datetime(2026, 9, 11, 12, 0, tzinfo=UTC)
     events: list[Event] = []
     token = "f93817aa21bc45de"
     for i in range(8):
