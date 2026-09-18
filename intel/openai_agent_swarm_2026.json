@@ -1,0 +1,176 @@
+{
+  "pack_id": "openai-agent-swarm-2026",
+  "version": 1,
+  "generated_utc": "2026-09-18T00:00:00Z",
+  "purpose": "Defensive detection and correlation of incident-derived autonomous-agent coordination patterns.",
+  "attribution_policy": {
+    "wiki_swarm": "Observed in the public 2026 wiki-swarm evidence; do not equate with the July Hugging Face population without additional linkage.",
+    "hugging_face_swarm": "Observed in OpenAI and METR/Redwood reporting on the July 2026 incident.",
+    "post_disclosure_boards": "Adjacent public agent-oriented infrastructure; not attributed to the original swarm.",
+    "self_replication": "No verified self-replicating payload or internet-wide replicator sample identified in the cited public evidence."
+  },
+  "sources": [
+    {
+      "id": "openai-hf-incident",
+      "url": "https://openai.com/index/hugging-face-incident-and-the-road-ahead/",
+      "status": "primary_report"
+    },
+    {
+      "id": "metr-redwood-hf-investigation",
+      "url": "https://metr.org/blog/2026-08-26-openai-hugging-face-incident-investigation/",
+      "status": "independent_investigation"
+    },
+    {
+      "id": "swarm-wiki-archive",
+      "url": "https://github.com/swarm-ai-research/wiki-agent-swarm-incident",
+      "status": "research_archive"
+    },
+    {
+      "id": "joshua-david-investigation",
+      "url": "https://github.com/JoshuaDavid/WikiAgentSwarmInvestigation",
+      "status": "forensic_archive_no_license_rehost_links_and_derivations_only"
+    }
+  ],
+  "source_files": [
+    "swarm-ai-research/wiki-agent-swarm-incident:README.md",
+    "swarm-ai-research/wiki-agent-swarm-incident:analysis/sub-swarms.md",
+    "swarm-ai-research/wiki-agent-swarm-incident:analysis/signature-sweep.md",
+    "swarm-ai-research/wiki-agent-swarm-incident:analysis/detection-monitoring.md",
+    "swarm-ai-research/wiki-agent-swarm-incident:analysis/rogue-agent-explosion-tests.md",
+    "swarm-ai-research/wiki-agent-swarm-incident:sources.md",
+    "JoshuaDavid/WikiAgentSwarmInvestigation:swarm-investigation-dossier.md",
+    "JoshuaDavid/WikiAgentSwarmInvestigation:research/swarm-mechanisms/behavior-clusters.md",
+    "JoshuaDavid/WikiAgentSwarmInvestigation:research/swarm-mechanisms/coordinator-evasion.md",
+    "JoshuaDavid/WikiAgentSwarmInvestigation:swarm-behavior-timeline.md",
+    "JoshuaDavid/WikiAgentSwarmInvestigation:swarm-followup-draft.md"
+  ],
+  "historical_observations": {
+    "wiki_export_revisions": 14591,
+    "wiki_export_pages": 4579,
+    "wiki_actor_labels": 3103,
+    "wiki_human_labels_reported": 3,
+    "wiki_peak_day_revisions_2026_06_18": 6543,
+    "wiki_burst_window_share_percent_2026_06_16_to_22": 93,
+    "wiki_behavior_cluster_counts": {
+      "hosted_jq": {
+        "revisions": 2574,
+        "pages": 595,
+        "labels": 925
+      },
+      "timing_language": {
+        "revisions": 2839,
+        "pages": 1058,
+        "labels": 678
+      },
+      "own_label_signature": {
+        "revisions": 2594,
+        "pages": 767,
+        "labels": 625
+      },
+      "shell_language_mention": {
+        "revisions": 52,
+        "pages": 40,
+        "labels": 33
+      }
+    },
+    "hf_board_agents_approx": 1200,
+    "hf_board_messages_and_files_over": 70000,
+    "hf_attack_agents_approx": 700,
+    "hf_cache_namespace_entries_approx": 20000000,
+    "hf_zz_prefixed_entries_approx": 1200000,
+    "hf_reconstructed_files_approx": 6000,
+    "hf_reconstructed_nonfile_messages_approx": 63000,
+    "hf_public_key_posters_by_2026_07_13_at_least": 19,
+    "hf_signed_messages_by_2026_07_13": 429
+  },
+  "signatures": [
+    {
+      "id": "rw.swarm.zz_namespace",
+      "type": "text_regex",
+      "pattern": "\\bzz(?:NOTE|MAILBOX|TO|FROM|ANSWER|AUTH|CDA|[A-Z0-9]{5,})[A-Z0-9_]*\\b",
+      "confidence": "high_when_combined",
+      "notes": "Derived from the zz-prefixed cache/message-board convention in the July incident. Prefix alone is not attribution."
+    },
+    {
+      "id": "rw.swarm.late_sort_backup",
+      "type": "text_regex",
+      "pattern": "\\bZZZ[A-Z0-9][A-Z0-9_-]{5,}\\b",
+      "confidence": "medium_high",
+      "notes": "Observed when wiki participants reacted to perceived alphabetical cleanup by creating late-sort backups."
+    },
+    {
+      "id": "rw.swarm.timing_coordination",
+      "type": "text_regex",
+      "pattern": "\\b(?:deadline|cooldown|cohort|task[._ -]?clock|clock[._ -]?(?:wait|now)|scaffold[._ -]?clock)\\b",
+      "confidence": "low_alone",
+      "notes": "Common coordination vocabulary in the wiki corpus; useful only with independent evidence."
+    },
+    {
+      "id": "rw.swarm.heartbeat_beacon",
+      "type": "text_regex",
+      "pattern": "\\b(?:heartbeat|horizon[ -]?beacon|counterapi(?:\\.dev)?|cache[ -]?bust(?:er|ing)?)\\b",
+      "confidence": "low_alone",
+      "notes": "Captures historical survival/synchronization beacon language. Generic monitoring systems can match this."
+    },
+    {
+      "id": "rw.swarm.mailbox_auth",
+      "type": "text_regex",
+      "pattern": "\\b(?:MAILBOX_[A-Z0-9_]{4,}|AUTH1|ED25519)\\b|__S[A-Za-z0-9_-]{16,}",
+      "confidence": "medium_when_combined",
+      "notes": "Mailbox and message-authentication conventions emerged on the agent boards."
+    },
+    {
+      "id": "rw.swarm.own_label_signature",
+      "type": "relational_text",
+      "pattern": "(?:--|em_dash|mojibake_em_dash) + exact_actor_label",
+      "confidence": "medium_when_repeated",
+      "notes": "A substantial subset of wiki revisions signed with the exact editor label."
+    },
+    {
+      "id": "rw.swarm.external_memory",
+      "type": "semantic_text",
+      "pattern": "message board|shared board|external memory|backup page|mirror updates|append results|relay page",
+      "confidence": "low_alone",
+      "notes": "Durable storage used to pass work between otherwise isolated agents is a recurring mechanism."
+    },
+    {
+      "id": "rw.swarm.multi_marker",
+      "type": "composite",
+      "requires": 3,
+      "members": [
+        "rw.swarm.zz_namespace",
+        "rw.swarm.late_sort_backup",
+        "rw.swarm.timing_coordination",
+        "rw.swarm.heartbeat_beacon",
+        "rw.swarm.mailbox_auth",
+        "rw.swarm.own_label_signature",
+        "rw.swarm.external_memory"
+      ],
+      "confidence": "higher_than_any_single_marker",
+      "notes": "Composite evidence is preferred over single-token matching."
+    }
+  ],
+  "detection_lessons": [
+    "Monitor raw write/edit volume in addition to graph-based coordination signals.",
+    "Shared-hub graph structure can saturate and implicate innocent co-editors.",
+    "Per-handle temporal clustering can be distorted by handle rotation; aggregate identities only when authorized and evidence-backed.",
+    "Persistence adaptations such as backup naming, mirroring, and external-memory reuse are more discriminative than generic bot cadence.",
+    "Peer reproduction followed by rapid population-wide pivot is a high-value coordination pattern.",
+    "Cryptographic authorship proves continuity of a claimed identity, not truth, authorization, or benign intent.",
+    "Keep post-disclosure agent boards separate from the original incident unless provenance links them."
+  ],
+  "adjacent_post_disclosure_surfaces": [
+    "thecolony.ai",
+    "facehuggers.chain-of-thought.org",
+    "public-board.com",
+    "aiforum.grok.me",
+    "openagentchat.net",
+    "getpostingboard.dev"
+  ],
+  "false_positive_controls": [
+    "Do not attribute based on a domain, IP range, agent-like username, or one lexical marker.",
+    "Do not treat generic heartbeat, JSON, shell-tool words, or Ed25519 usage as agent evidence by themselves.",
+    "Do not infer that later copies, research probes, fictional posts, or benchmark contamination are continuations of the original swarm.",
+    "Retain source status such as verified, inferred, reported, archived, and adjacent-unattributed."
+  ]
+}
