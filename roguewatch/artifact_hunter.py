@@ -11,6 +11,7 @@ from urllib.parse import parse_qsl, urlparse
 
 import httpx
 
+from .backdoor_signatures import backdoor_signals
 from .models import Event
 from .swarm_signatures import incident_pattern_signals
 
@@ -66,6 +67,7 @@ class ArtifactRecord:
     fetched_at: str
     truncated: bool
     incident_markers: tuple[str, ...]
+    backdoor_markers: tuple[str, ...]
     self_replication_terms: bool
     code_like: bool
     embedded_sha256_count: int
@@ -143,6 +145,9 @@ def analyze_artifact_bytes(
     incident_markers = tuple(
         sorted(signal.name for signal in incident_pattern_signals([event]))
     )
+    backdoor_markers = tuple(
+        sorted(signal.name for signal in backdoor_signals([event]))
+    )
 
     return ArtifactRecord(
         source_url=source_url,
@@ -155,12 +160,36 @@ def analyze_artifact_bytes(
         fetched_at=datetime.now(UTC).isoformat(),
         truncated=truncated,
         incident_markers=incident_markers,
+        backdoor_markers=backdoor_markers,
         self_replication_terms=bool(_SELF_REPLICATION_RE.search(text)),
         code_like=bool(_CODE_RE.search(text)),
         embedded_sha256_count=len(_HASH_RE.findall(text)),
         wayback_timestamp=wayback_capture.timestamp if wayback_capture else None,
         wayback_original_url=wayback_capture.original_url if wayback_capture else None,
         wayback_digest=wayback_capture.digest if wayback_capture else None,
+    )
+
+
+def inspect_local_file(
+    path: str | Path,
+    *,
+    max_bytes: int = 2_000_000,
+) -> ArtifactRecord:
+    local = Path(path)
+    if not local.is_file():
+        raise FileNotFoundError(local)
+    max_bytes = max(1, max_bytes)
+    with local.open("rb") as handle:
+        payload = handle.read(max_bytes + 1)
+    truncated = len(payload) > max_bytes
+    if truncated:
+        payload = payload[:max_bytes]
+    return analyze_artifact_bytes(
+        payload,
+        source_url=local.resolve().as_uri(),
+        retrieved_url=local.resolve().as_uri(),
+        source_kind="local_file",
+        truncated=truncated,
     )
 
 
