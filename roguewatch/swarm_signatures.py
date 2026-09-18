@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 from .models import Event, Signal
 
@@ -20,14 +20,17 @@ SIGNATURE_RULES = (
         signal="swarm_zz_namespace",
         pattern=re.compile(
             r"\bzz(?:NOTE|MAILBOX|TO|FROM|ANSWER|AUTH|CDA|[A-Z0-9]{5,})[A-Z0-9_]*\b",
-            re.I,
+            re.IGNORECASE,
         ),
         base_score=0.90,
         reason="Uses the zz-prefixed namespace observed on the July 2026 agent message board",
     ),
     SignatureRule(
         signal="swarm_late_sort_backup",
-        pattern=re.compile(r"\bZZZ[A-Z0-9][A-Z0-9_-]{5,}\b", re.I),
+        pattern=re.compile(
+            r"\bZZZ[A-Z0-9][A-Z0-9_-]{5,}\b",
+            re.IGNORECASE,
+        ),
         base_score=0.92,
         reason="Uses a ZZZ-prefixed late-sort backup naming pattern seen during wiki cleanup",
     ),
@@ -36,7 +39,7 @@ SIGNATURE_RULES = (
         pattern=re.compile(
             r"\b(?:deadline|cooldown|cohort|task[._ -]?clock|"
             r"clock[._ -]?(?:wait|now)|scaffold[._ -]?clock)\b",
-            re.I,
+            re.IGNORECASE,
         ),
         base_score=0.46,
         reason="Uses timing/cohort vocabulary repeatedly observed in swarm coordination",
@@ -46,7 +49,7 @@ SIGNATURE_RULES = (
         pattern=re.compile(
             r"\b(?:heartbeat|horizon[ -]?beacon|counterapi(?:\.dev)?|"
             r"cache[ -]?bust(?:er|ing)?)\b",
-            re.I,
+            re.IGNORECASE,
         ),
         base_score=0.56,
         reason="Uses heartbeat/beacon or cache-busting language seen in public relay experiments",
@@ -56,7 +59,7 @@ SIGNATURE_RULES = (
         pattern=re.compile(
             r"\b(?:MAILBOX_[A-Z0-9_]{4,}|AUTH1|ED25519)\b|"
             r"__S[A-Za-z0-9_-]{16,}",
-            re.I,
+            re.IGNORECASE,
         ),
         base_score=0.72,
         reason="Uses mailbox/authentication conventions observed on agent message boards",
@@ -66,7 +69,7 @@ SIGNATURE_RULES = (
         pattern=re.compile(
             r"\b(?:message board|shared board|external memory|backup page|"
             r"mirror (?:important )?updates|append results|relay page)\b",
-            re.I,
+            re.IGNORECASE,
         ),
         base_score=0.48,
         reason="Describes durable shared storage used as external memory or a relay",
@@ -107,7 +110,10 @@ def incident_pattern_signals(events: Iterable[Event]) -> list[Signal]:
         actor = event.actor_id.strip()
         if not actor:
             continue
-        signature = re.compile(rf"(?:--|—|â€”)\s*{re.escape(actor)}\b", re.I)
+        signature = re.compile(
+            rf"(?:--|—|â€”)\s*{re.escape(actor)}\b",
+            re.IGNORECASE,
+        )
         if signature.search(event.text or ""):
             own_label_hits.append(event)
     if own_label_hits:
