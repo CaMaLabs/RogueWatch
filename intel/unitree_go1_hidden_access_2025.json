@@ -1,0 +1,75 @@
+{
+  "pack_id": "unitree-go1-hidden-access-2025",
+  "version": 1,
+  "purpose": "Defensive detection of Go1-style hidden remote-access and persistence patterns.",
+  "attribution_policy": {
+    "known_cve": "CVE-2025-2894 is a published Unitree Go1 hidden-functionality issue.",
+    "generic_detection": "RogueWatch uses the case to derive generic hidden-access patterns; a match is not proof of malicious intent.",
+    "secrets": "Credential values, passwords, API keys, and access tokens are not stored in this pack."
+  },
+  "sources": [
+    {
+      "id": "cve-2025-2894",
+      "url": "https://www.cve.org/CVERecord?id=CVE-2025-2894",
+      "status": "cve_record"
+    },
+    {
+      "id": "aha-go1-disclosure",
+      "url": "https://takeonme.org/cves/cve-2025-2894/",
+      "status": "cna_disclosure"
+    },
+    {
+      "id": "unitree-go1-download",
+      "url": "https://www.unitree.com/download/",
+      "status": "vendor_remediation"
+    },
+    {
+      "id": "go1-research-notes",
+      "url": "https://github.com/MAVProxyUser/YushuTechUnitreeGo1",
+      "status": "public_research_notes"
+    }
+  ],
+  "known_indicators": [
+    {
+      "indicator": "CSClientDaemon",
+      "kind": "service_name",
+      "confidence": "high_for_go1_case"
+    },
+    {
+      "indicator": "/usr/local/zhexi/cloudsail/csclient",
+      "kind": "process_path",
+      "confidence": "high_for_go1_case"
+    },
+    {
+      "indicator": "Go1_rmTunnel_2025_04_18_e5adb412.zip",
+      "kind": "vendor_patch_filename",
+      "confidence": "high_for_remediation"
+    }
+  ],
+  "published_affected_version": "2022_05_11_e0d0e617",
+  "weakness": "CWE-912 Hidden Functionality",
+  "derived_detection_families": [
+    "remote_tunnel_service",
+    "boot_persistence",
+    "embedded_auth_material",
+    "privileged_remote_control",
+    "hidden_functionality_language",
+    "factory_wifi_autoconnect",
+    "persistent_hidden_remote_access_pattern",
+    "credential_gated_remote_control_pattern",
+    "persistent_factory_network_ingress_pattern"
+  ],
+  "defensive_lessons": [
+    "Inventory outbound tunnel clients and compare them with documented product features.",
+    "Correlate remote-access services with boot persistence and privilege level.",
+    "Detect static or embedded authorization material without recording its value.",
+    "Flag vendor-controlled remote command paths that bypass local owner approval.",
+    "Treat factory Wi-Fi/autoconnect profiles as ingress risk when combined with persistence or broad control capability.",
+    "Prefer composite evidence over one keyword or one service name.",
+    "Record remediation artifacts so known fixed/removed services are not mistaken for active backdoors."
+  ],
+  "remediation_provenance": {
+    "vendor_patch": "Go1_rmTunnel_2025_04_18_e5adb412.zip",
+    "vendor_description": "Incremental repair patch that completely removes tunnel services for greater security."
+  }
+}
