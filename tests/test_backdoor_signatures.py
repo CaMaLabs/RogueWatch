@@ -55,3 +55,46 @@ def test_generic_legitimate_ssh_reference_does_not_form_composite():
 
     assert names == {"privileged_remote_control"}
     assert "persistent_hidden_remote_access_pattern" not in names
+
+
+def test_unitree_g1_webrtc_dds_root_chain():
+    events = [
+        Event(
+            source="fixture",
+            actor_id="g1",
+            text=(
+                "Unauthenticated WebRTC-to-DDS bridge on TCP port 9991 exposes chat_go and "
+                "bashrunner; a world-readable static AES-128 key and path traversal permit "
+                "remote code execution as root."
+            ),
+        )
+    ]
+
+    signals = {signal.name: signal for signal in backdoor_signals(events)}
+
+    assert "unitree_g1_control_plane" in signals
+    assert "unauthenticated_robot_control_plane" in signals
+    assert "static_device_crypto_material" in signals
+    assert "privileged_remote_control" in signals
+    assert "unitree_g1_privileged_control_chain" in signals
+    assert signals["unitree_g1_privileged_control_chain"].score == 0.96
+
+
+def test_unitree_g1_ble_provisioning_chain():
+    events = [
+        Event(
+            source="fixture",
+            actor_id="g1",
+            text=(
+                "BLE GATT access without pairing reaches Wi-Fi provisioning in wpa_connect.sh; "
+                "crafted SSID data reaches system() as root through btgatt-server."
+            ),
+        )
+    ]
+
+    names = {signal.name for signal in backdoor_signals(events)}
+
+    assert "unitree_g1_control_plane" in names
+    assert "unauthenticated_robot_control_plane" in names
+    assert "robot_provisioning_to_root" in names
+    assert "unitree_g1_privileged_control_chain" in names
