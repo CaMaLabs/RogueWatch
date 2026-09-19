@@ -84,6 +84,47 @@ RULES = (
         reason="Static Wi-Fi profile or factory autoconnect configuration is present",
     ),
     BackdoorRule(
+        name="unitree_g1_control_plane",
+        pattern=re.compile(
+            r"\b(?:chat_go|bashrunner|btgatt-server|wpa_connect\.sh|"
+            r"webrtc(?:-to-)?dds|tcp(?: port)?\s*9991|0xFFE2)\b",
+            re.IGNORECASE,
+        ),
+        base_score=0.82,
+        reason="Matches a component or interface documented in the Unitree G1 EDU root-RCE disclosures",
+    ),
+    BackdoorRule(
+        name="unauthenticated_robot_control_plane",
+        pattern=re.compile(
+            r"\b(?:unauthenticated\s+(?:webrtc|dds|ble|gatt|control|remote)|"
+            r"without\s+(?:ble\s+)?pairing|no\s+(?:pairing|credentials)|"
+            r"missing authentication for critical function)\b",
+            re.IGNORECASE,
+        ),
+        base_score=0.78,
+        reason="Unauthenticated access to a robot control or provisioning plane is described",
+    ),
+    BackdoorRule(
+        name="static_device_crypto_material",
+        pattern=re.compile(
+            r"\b(?:static|hardcoded|world-readable|device-specific)\s+"
+            r"(?:aes(?:-128)?\s+)?(?:key|crypto(?:graphic)?\s+key|secret)\b",
+            re.IGNORECASE,
+        ),
+        base_score=0.70,
+        reason="Static or exposed device cryptographic material is described",
+    ),
+    BackdoorRule(
+        name="robot_provisioning_to_root",
+        pattern=re.compile(
+            r"\b(?:wifi|wi-fi|ble|gatt)\b.{0,180}\b(?:provisioning|ssid|wpa_supplicant)\b"
+            r"|\b(?:provisioning|ssid|wpa_supplicant)\b.{0,180}\b(?:root|system\(\)|rce)\b",
+            re.IGNORECASE,
+        ),
+        base_score=0.76,
+        reason="Robot provisioning/network configuration is linked to privileged execution",
+    ),
+    BackdoorRule(
         name="go1_cloudsail_known_ioc",
         pattern=re.compile(
             r"\b(?:CSClientDaemon|/usr/local/zhexi/cloudsail/csclient|"
@@ -180,6 +221,27 @@ def backdoor_signals(events: Iterable[Event]) -> list[Signal]:
                         "factory_wifi_autoconnect",
                         "boot_persistence",
                     ]
+                },
+            )
+        )
+
+    if "unitree_g1_control_plane" in names and "privileged_remote_control" in names:
+        components = ["unitree_g1_control_plane", "privileged_remote_control"]
+        for candidate in (
+            "unauthenticated_robot_control_plane",
+            "static_device_crypto_material",
+            "robot_provisioning_to_root",
+        ):
+            if candidate in names:
+                components.append(candidate)
+        signals.append(
+            Signal(
+                name="unitree_g1_privileged_control_chain",
+                score=0.96 if len(components) >= 3 else 0.88,
+                reason="Unitree G1 control-plane indicators co-occur with privileged execution",
+                evidence={
+                    "components": components,
+                    "cves": ["CVE-2026-76639", "CVE-2026-76640"],
                 },
             )
         )
