@@ -1,0 +1,38 @@
+{
+  "title": "Unitree G1 EDU root-RCE control-plane disclosures",
+  "updated": "2026-09-19",
+  "provenance_confidence": "high",
+  "affected": "Unitree G1 EDU firmware through 1.5.2 per published CVE records",
+  "cves": [
+    "CVE-2026-76639",
+    "CVE-2026-76640"
+  ],
+  "defensive_indicators": {
+    "components": [
+      "chat_go",
+      "bashrunner",
+      "btgatt-server",
+      "wpa_connect.sh"
+    ],
+    "interfaces": [
+      "WebRTC-to-DDS bridge",
+      "TCP 9991",
+      "BLE GATT characteristic 0xFFE2"
+    ],
+    "behaviors": [
+      "unauthenticated control-plane access",
+      "static/exposed AES key material",
+      "path traversal into privileged execution path",
+      "BLE/Wi-Fi provisioning abuse",
+      "root command execution"
+    ]
+  },
+  "interpretation": "Behavioral/architectural indicators only. Component names or port presence alone are not evidence of compromise.",
+  "propagation_note": "Research demonstrated attack reach between nearby G1 robots, but the July 2026 cloud authorization fix breaks the exact published cross-owner proof-of-concept flow. Do not label current firmware autonomously wormable without new evidence.",
+  "sources": [
+    "https://boschko.ca/g1-ble-rce/",
+    "https://github.com/OlivierLaflamme/UniBLEed",
+    "https://www.tenable.com/cve/CVE-2026-76639",
+    "https://www.tenable.com/cve/CVE-2026-76640"
+  ]
+}
