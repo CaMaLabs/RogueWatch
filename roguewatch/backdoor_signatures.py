@@ -54,7 +54,7 @@ RULES = (
         pattern=re.compile(
             r"\b(?:complete remote control|remote command|command channel|"
             r"root access|root shell|ssh access|remote code execution|rce|"
-            r"execute[_ -]?remote[_ -]?command)\b",
+            r"execute[_ -]?remote[_ -]?command|as root|system\(\)\s+as\s+root)\b",
             re.IGNORECASE,
         ),
         base_score=0.70,
