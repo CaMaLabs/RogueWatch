@@ -14,9 +14,11 @@ It is deliberately evidence-driven: RogueWatch does not claim to prove that an i
 - Inspect local or public artifacts without executing them, computing SHA-256/SHA-1 plus incident and hidden-access markers.
 - Passively search Wayback CDX and inspect archived captures without probing historical mutation endpoints.
 - Detect Go1-derived hidden-access patterns: boot-persistent tunnel clients, embedded/static authorization material, privileged remote control, undeclared functionality, and persistent factory-network ingress.
+- Triage findings into Critical, High, Medium, Low, and Informational using evidence strength instead of raw keyword volume.
+- Surface backdoor, swarm, propagation, artifact, actor, channel, target, and case context in the dashboard.
 - Build a graph of actors, events, and suspected channels.
 - Store observations in SQLite.
-- FastAPI API plus a small local dashboard.
+- FastAPI API plus a defensive investigation dashboard.
 - Conservative public-web collector with explicit host allowlisting, robots.txt checks, rate limiting, and no authentication or anti-bot bypass behavior.
 - Deterministic honeysite-style demo data for regression testing.
 
@@ -42,6 +44,21 @@ Known Go1-specific indicators are useful for correlation, but the detector is in
 
 RogueWatch never stores historical credential values in its intel pack.
 
+## Dashboard investigation console
+
+The dashboard is now designed to show the few findings that matter first:
+
+- Top cards for events, targets, open cases, Critical, High, actors, channels, and artifacts.
+- A compact row for swarm patterns, backdoor patterns, known IOCs, propagation leads, and archived artifacts.
+- Dedicated Hidden Access / Backdoors, Swarm Markers, Propagation Evidence, Artifact Hunter, Cases, Scan Targets, Actor Findings, and Channel Findings panels.
+- Filters for severity, finding family, target, actor, source, status, and timeframe.
+- Real-time polling that updates counts and findings without a full page reload.
+- High and Critical findings are visually prominent; informational findings remain subdued.
+
+Backdoor findings distinguish individual indicators, composite suspicious patterns, and known case IOCs. A single generic SSH, systemd, token, or tunnel reference is treated as low or informational unless independent supporting evidence is present.
+
+Case detail includes summary, severity, target, associated actors, channels, artifacts, timeline entries, signals, hashes, source URLs, provenance fields, analyst notes, and disposition. Supported dispositions include `new`, `investigating`, `likely benign`, `suspicious`, `confirmed known IOC`, `needs more evidence`, and `closed`. Heuristic scores do not automatically mark a case confirmed malicious.
+
 ## Historical artifact hunter
 
 `roguewatch/artifact_hunter.py` provides passive artifact collection and inspection:
@@ -54,6 +71,14 @@ RogueWatch never stores historical credential values in its intel pack.
 - `backdoor_markers` from the hidden-access signature pack.
 - self-replication terminology and code-like-content flags.
 - JSONL provenance export.
+
+The dashboard exposes three artifact workflows:
+
+- Inspect pasted text via `POST /inspect/artifact`.
+- Inspect a public URL via a narrow GET-only URL inspection endpoint.
+- Search Wayback CDX and inspect archived captures instead of probing the historical origin.
+
+Artifact results show SHA-256, SHA-1, source URL, retrieved/archive URL, media type, byte count, truncation status, timestamp, Wayback timestamp/digest when present, incident markers, backdoor markers, self-replication terms, code-like status, and embedded SHA-256 count. Retrieved material is hashed and statically inspected; RogueWatch does not execute downloaded artifacts or automatically open binaries.
 
 Examples:
 
@@ -74,7 +99,9 @@ Use RogueWatch only on public information or systems/traffic you own or are auth
 
 Do not execute historical exploit recipes, mutation endpoints, GET-writable beacons, suspected propagating code, or retrieved binaries during collection. Preserve provenance and analyze captured text/metadata offline wherever possible.
 
-The artifact hunter deliberately rejects mutation-like URL patterns and does not expose an arbitrary LAN-fetch endpoint through the API.
+The artifact hunter deliberately rejects mutation-like URL patterns and does not expose an arbitrary LAN-fetch endpoint through the API. URL inspection accepts only `http` and `https`, rejects credentials, localhost, private, link-local, loopback, multicast, reserved, and unresolved destinations, revalidates redirects, applies timeout and size limits, and refuses mutation-like paths or query parameters.
+
+Propagation evidence is separated from ordinary discussion. RogueWatch distinguishes language-only mentions, code-like material, persistence, bootstrap behavior, child/new-instance creation, destination/new-host evidence, independent copies, and provenance. It does not label material as a self-replicating payload solely because it contains words such as `worm`, `spawn`, `bootstrap`, or `self-replicate`.
 
 ## Quick start
 
@@ -100,6 +127,16 @@ Open `http://127.0.0.1:8777` and click **Load ground-truth demo**.
 - `POST /demo/load`
 - `POST /collect/public`
 - `POST /inspect/artifact`
+- `POST /inspect/url`
+- `POST /inspect/wayback`
+- `GET /findings`
+- `GET /findings/backdoors`
+- `GET /findings/swarm`
+- `GET /findings/artifacts`
+- `GET /cases`
+- `GET /cases/{case_id}`
+- `POST /cases/{case_id}/entries`
+- `GET /scan/targets`
 - `GET /analysis`
 - `GET /graph`
 
@@ -130,6 +167,8 @@ Example local text inspection request:
 RogueWatch intentionally avoids single-token attribution. Independent signals are combined into actor, channel, and artifact findings. Generic technologies such as SSH, systemd, VPNs, reverse tunnels, JSON, Ed25519, or API tokens are not treated as proof by themselves.
 
 The strongest hidden-access findings require multiple independent components to co-occur, and known remediation artifacts are kept distinct from active vulnerable-service indicators.
+
+Swarm markers are also supporting evidence only. They can raise the priority of a lead, but they do not independently prove that an actor is an autonomous AI agent; AI-agent classification still requires independent behavioral/protocol evidence.
 
 ## Planned next steps
 

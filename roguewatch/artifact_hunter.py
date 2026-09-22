@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import hashlib
+import ipaddress
 import json
 import re
+import socket
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
@@ -96,11 +98,34 @@ def _hostname(url: str) -> str:
     return (urlparse(url).hostname or "").lower()
 
 
+def _is_public_address(host: str) -> bool:
+    try:
+        addresses = {ipaddress.ip_address(host)}
+    except ValueError:
+        try:
+            infos = socket.getaddrinfo(host, None, type=socket.SOCK_STREAM)
+        except socket.gaierror as exc:
+            raise PermissionError(f"Unable to resolve host {host!r}") from exc
+        addresses = {ipaddress.ip_address(info[4][0]) for info in infos}
+    return bool(addresses) and all(
+        not (
+            address.is_private
+            or address.is_loopback
+            or address.is_link_local
+            or address.is_multicast
+            or address.is_reserved
+            or address.is_unspecified
+        )
+        for address in addresses
+    )
+
+
 def validate_readonly_url(
     url: str,
     *,
     allowed_hosts: set[str] | None = None,
     allow_wayback_replay: bool = True,
+    require_public: bool = True,
 ) -> None:
     parsed = urlparse(url)
     if parsed.scheme not in {"http", "https"}:
@@ -110,11 +135,15 @@ def validate_readonly_url(
     host = (parsed.hostname or "").lower()
     if not host:
         raise ValueError("URL must include a hostname")
+    if host in {"localhost", "localhost.localdomain"} or host.endswith(".localhost"):
+        raise PermissionError("Localhost destinations are not supported")
     if allowed_hosts is not None and host not in {item.lower() for item in allowed_hosts}:
         raise PermissionError(f"Host {host!r} is not allowlisted")
 
     if allow_wayback_replay and host == "web.archive.org" and parsed.path.startswith("/web/"):
         return
+    if require_public and not _is_public_address(host):
+        raise PermissionError("Only public destinations are supported")
 
     query_keys = {key.lower() for key, _ in parse_qsl(parsed.query, keep_blank_values=True)}
     risky_keys = sorted(query_keys & _MUTATING_QUERY_KEYS)
